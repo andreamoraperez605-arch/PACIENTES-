@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Pacientes</title>
+  <link rel="icon" href="data:,">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #2a3441;
+      --text:    #e6edf3;
+      --muted:   #7d8fa3;
+      --accent:  #3dd6ac;
+      --blue:    #4da3ff;
+      --red:     #ff6b6b;
+      --yellow:  #ffd166;
+      --purple:  #b388ff;
+      --orange:  #ff9f43;
+      --teal:    #26c6da;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      animation: slideDown 0.5s ease;
+    }
+
+    .logo-dot {
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 8px var(--accent); }
+      50%       { box-shadow: 0 0 20px var(--accent); }
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    header span {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-left: auto;
+      font-weight: 300;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 36px 24px 60px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-left: 2px;
+    }
+
+    /* Stat cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 36px;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card:hover { transform: translateY(-3px); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .stat-card.blue::before  { background: var(--blue); }
+    .stat-card.green::before { background: var(--accent); }
+    .stat-card.red::before   { background: var(--red); }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.8rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-card.blue  .stat-value { color: var(--blue); }
+    .stat-card.green .stat-value { color: var(--accent); }
+    .stat-card.red   .stat-value { color: var(--red); }
+
+    .stat-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* Charts */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      animation: fadeUp 0.5s ease 0.25s both;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px;
+    }
+
+    .chart-card.full { grid-column: 1 / -1; }
+
+    .chart-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .chart-subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .chart-wrap { position: relative; width: 100%; }
+
+    .chart-wrap.doughnut {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      gap: 8px;
+    }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.7rem;
+      color: var(--border);
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 700px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .chart-card.full { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Dashboard de Pacientes</h1>
+  <span id="fecha-header"></span>
+</header>
+
+<main>
+
+  <div class="section-label">Resumen general</div>
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-label">EN TRATAMIENTO</div>
+      <div class="stat-value" id="num-tratamiento">—</div>
+      <div class="stat-sub">pacientes activos</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">DADOS DE ALTA</div>
+      <div class="stat-value" id="num-alta">—</div>
+      <div class="stat-sub">completaron tratamiento</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">ABANDONARON</div>
+      <div class="stat-value" id="num-baja">—</div>
+      <div class="stat-sub">sin concluir</div>
+    </div>
+  </div>
+
+  <div class="section-label">Análisis detallado</div>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <div class="chart-title">Estado de Pacientes</div>
+      <div class="chart-subtitle">Distribución por condición actual</div>
+      <div class="chart-wrap">
+        <div class="loading" id="load1"><div class="spinner"></div> Cargando...</div>
+        <canvas id="grafica" style="display:none"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Distribución por Edad</div>
+      <div class="chart-subtitle">Rangos etarios del grupo en atención</div>
+      <div class="chart-wrap">
+        <div class="loading" id="load2"><div class="spinner"></div> Cargando...</div>
+        <canvas id="graficaEdades" style="display:none"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Pacientes por Escuela</div>
+      <div class="chart-subtitle">Procedencia institucional de los pacientes</div>
+      <div class="chart-wrap doughnut">
+        <div class="loading" id="load3"><div class="spinner"></div> Cargando...</div>
+        <canvas id="graficaEscuelas" style="display:none"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Pacientes por Procedencia</div>
+      <div class="chart-subtitle">Distribución por zona geográfica (Temixco / Zapata)</div>
+      <div class="chart-wrap doughnut">
+        <div class="loading" id="load4"><div class="spinner"></div> Cargando...</div>
+        <canvas id="graficaProcedencia" style="display:none"></canvas>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>SISTEMA DE GESTIÓN DE PACIENTES · 2026</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
