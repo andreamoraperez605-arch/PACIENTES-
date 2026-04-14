@@ -70,6 +70,21 @@ app.get('/procedencia', (req, res) => {
   })
 })
 
+app.get('/motivo', (req, res) => {
+  const query = `
+    SELECT motivo, COUNT(*) AS total
+    FROM pacientes
+    WHERE motivo IS NOT NULL
+    GROUP BY motivo
+  `
+  db.query(query, (err, result) => {
+    if (err) { res.status(500).json(err); return }
+    res.json(result)
+  })
+})
+
+
+
 app.listen(3000, () => {
   console.log('Servidor corriendo en http://localhost:3000')
 })

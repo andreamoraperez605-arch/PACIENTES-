@@ -146,7 +146,7 @@ async function cargarProcedencia() {
         labels: d.map(function(x) { return x.procedencia }),
         datasets: [{
           data: d.map(function(x) { return x.total }),
-          backgroundColor: [COLORS.teal, COLORS.orange],
+          backgroundColor: [COLORS.red, COLORS.orange],
           borderColor: '#161b22',
           borderWidth: 3,
           hoverOffset: 12,
@@ -173,8 +173,49 @@ async function cargarProcedencia() {
     document.getElementById('load4').textContent = 'Error al cargar datos'
   }
 }
+async function cargarMotivo() {
+  try {
+    console.log('info');
+    const r = await fetch('/motivo')
+    const d = await r.json()
+    
+    showChart('load5', 'graficaMotivo')
+    new Chart(document.getElementById('graficaMotivo'), {
+      type: 'pie',
+      data: {
+        labels: d.map(function(x) { return x.motivo }),
+        datasets: [{
+          data: d.map(function(x) { return x.total }),
+          backgroundColor: [COLORS.blue, COLORS.green ],
+          borderColor: '#161b22',
+          borderWidth: 3,
+          hoverOffset: 12,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { padding: 20, boxWidth: 12, boxHeight: 12, borderRadius: 6, useBorderRadius: true }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.label + ': ' + ctx.parsed + ' motivo'
+              }
+            }
+          }
+        }
+      }
+    })
+  } catch(e) {
+    document.getElementById('load5').textContent = 'Error al cargar datos'
+  }
+}
 
 cargarDatos()
 cargarEdades()
 cargarEscuelas()
 cargarProcedencia()
+cargarMotivo()
